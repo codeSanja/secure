@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'express-jwt';
 import cors from 'cors';
 import jwks from 'jwks-rsa';
+import jwtAuthz from 'express-jwt-authz';
 import bodyParser from 'body-parser';
 
 const port = 4000;
@@ -11,7 +12,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extend: true }));
 app.use(cors());
 
-var jwtCheck = jwt({
+const secureApi = jwt({
     secret: jwks.expressJwtSecret({
         cache: true,
         rateLimit: true,
@@ -19,18 +20,20 @@ var jwtCheck = jwt({
         jwksUri: "https://codesanja0.eu.auth0.com/.well-known/jwks.json"
     }),
     audience: 'https://manny-linkedin',
-    // aud: 'https://manny-linkedin',
     issuer: "https://codesanja0.eu.auth0.com/",
     algorithms: ['RS256']
 });
 
-app.use(jwtCheck);
+const checkScopes = jwtAuthz(['read:courses']);
+
+// app.use(checkScopes);
 
 app.get('/authorized', function (req, res) {
     res.send('Secured Resource');
 });
 
 app.get('/courses', (req, res) => {
+// app.get('/courses', secureApi, checkScopes, (req, res) => {
     let courses = [
         {
             "id": 1,

@@ -25,7 +25,6 @@ export default class Auth {
   handleAuthentication() {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
-      debugger
         this.setSession(authResult);
         history.replace('/feed');
       } else if (err) {
